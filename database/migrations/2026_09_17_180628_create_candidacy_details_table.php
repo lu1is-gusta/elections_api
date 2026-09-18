@@ -22,7 +22,12 @@ return new class extends Migration
             $table->text('process_number')->nullable();
             $table->boolean('replaced')->nullable();
             $table->unsignedBigInteger('replaced_sq')->nullable();
-            $table->jsonb('extra')->default(DB::raw("'{}'::jsonb"));
+
+            if (DB::getDriverName() === 'pgsql') {
+                $table->jsonb('extra')->default(DB::raw("'{}'::jsonb"));
+            } else {
+                $table->json('extra')->default('{}');
+            }
         });
     }
 

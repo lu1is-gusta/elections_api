@@ -58,9 +58,12 @@ return new class extends Migration
         });
 
         DB::statement('CREATE INDEX candidacies_person_idx ON candidacies (person_id, election_id DESC)');
-        DB::statement('CREATE INDEX candidacies_elected_idx ON candidacies (election_id, is_elected, id) WHERE is_elected = true');
-        DB::statement('CREATE INDEX candidacies_name_trgm_idx ON candidacies USING gin (ballot_name gin_trgm_ops)');
-        DB::statement('CREATE INDEX candidacies_civil_trgm_idx ON candidacies USING gin (civil_name gin_trgm_ops)');
+
+        if (DB::getDriverName() === 'pgsql') {
+            DB::statement('CREATE INDEX candidacies_elected_idx ON candidacies (election_id, is_elected, id) WHERE is_elected = true');
+            DB::statement('CREATE INDEX candidacies_name_trgm_idx ON candidacies USING gin (ballot_name gin_trgm_ops)');
+            DB::statement('CREATE INDEX candidacies_civil_trgm_idx ON candidacies USING gin (civil_name gin_trgm_ops)');
+        }
     }
 
     /**

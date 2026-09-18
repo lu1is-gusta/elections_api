@@ -22,7 +22,13 @@ return new class extends Migration
             $table->text('title');
             $table->text('summary')->nullable();
             $table->text('url')->nullable();
-            $table->jsonb('metadata')->default(DB::raw("'{}'::jsonb"));
+
+            if (DB::getDriverName() === 'pgsql') {
+                $table->jsonb('metadata')->default(DB::raw("'{}'::jsonb"));
+            } else {
+                $table->json('metadata')->default('{}');
+            }
+
             $table->text('source');
         });
 

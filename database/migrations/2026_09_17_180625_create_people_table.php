@@ -13,7 +13,6 @@ return new class extends Migration
     {
         Schema::create('people', function (Blueprint $table) {
             $table->id();
-            $table->timestamps();
             $table->text('civil_name');
             $table->text('ballot_name')->nullable();
             $table->date('birth_date')->nullable();
