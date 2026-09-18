@@ -2,7 +2,9 @@
 
 namespace App\Models;
 
+use Database\Factories\ElectionFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
@@ -16,6 +18,9 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 ])]
 class Election extends Model
 {
+    /** @use HasFactory<ElectionFactory> */
+    use HasFactory;
+
     public $timestamps = false;
 
     /**

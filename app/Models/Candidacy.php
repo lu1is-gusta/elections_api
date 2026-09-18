@@ -2,11 +2,15 @@
 
 namespace App\Models;
 
+use Database\Factories\CandidacyFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Support\Facades\DB;
 
 #[Fillable([
     'person_id',
@@ -43,6 +47,9 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 ])]
 class Candidacy extends Model
 {
+    /** @use HasFactory<CandidacyFactory> */
+    use HasFactory;
+
     public $timestamps = false;
 
     /**
@@ -107,6 +114,36 @@ class Candidacy extends Model
     public function party(): BelongsTo
     {
         return $this->belongsTo(Party::class);
+    }
+
+    /**
+     * @param  Builder<Candidacy>  $query
+     * @param  array{
+     *     election_id: int,
+     *     uf?: string|null,
+     *     office_id?: int|null,
+     *     party_id?: int|null,
+     *     electoral_unit_id?: int|null,
+     *     q?: string|null,
+     *     elected?: bool|null
+     * }  $filters
+     */
+    public function scopeForListing(Builder $query, array $filters): void
+    {
+        $query->where('election_id', $filters['election_id'])
+            ->when($filters['uf'] ?? null, fn (Builder $query, string $uf) => $query->where('uf', $uf))
+            ->when($filters['office_id'] ?? null, fn (Builder $query, int|string $officeId) => $query->where('office_id', $officeId))
+            ->when($filters['party_id'] ?? null, fn (Builder $query, int|string $partyId) => $query->where('party_id', $partyId))
+            ->when($filters['electoral_unit_id'] ?? null, fn (Builder $query, int|string $unitId) => $query->where('electoral_unit_id', $unitId))
+            ->when(array_key_exists('elected', $filters), fn (Builder $query) => $query->where('is_elected', $filters['elected']))
+            ->when($filters['q'] ?? null, function (Builder $query, string $q): void {
+                $operator = DB::getDriverName() === 'pgsql' ? 'ilike' : 'like';
+                $term = '%'.$q.'%';
+                $query->where(function (Builder $query) use ($operator, $term): void {
+                    $query->where('ballot_name', $operator, $term)
+                        ->orWhere('civil_name', $operator, $term);
+                });
+            });
     }
 
     /**
