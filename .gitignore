@@ -21,6 +21,11 @@
 /storage/*.key
 /storage/pail
 /vendor
+/etl/.venv/
+/etl/.pytest_cache/
+/etl/**/__pycache__/
+/etl/**/*.egg-info/
+/etl/data/
 _ide_helper.php
 Homestead.json
 Homestead.yaml

@@ -17,5 +17,23 @@ services:
       timeout: 5s
       retries: 5
 
+  etl:
+    profiles: ["etl"]
+    build:
+      context: ./etl
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      DB_HOST: postgres
+      DB_PORT: "5432"
+      ETL_DATA_DIR: /data
+    volumes:
+      - etl_data:/data
+    depends_on:
+      postgres:
+        condition: service_healthy
+
 volumes:
   postgres_data:
+  etl_data:
